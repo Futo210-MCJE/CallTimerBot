@@ -46,6 +46,28 @@ intents.guilds = True
 intents.voice_states = True
 
 
+async def start_web_server():
+    """クラウド（Render等）で無料常時稼働させるためのヘルスチェック用軽量サーバー"""
+    from aiohttp import web
+    app = web.Application()
+
+    async def handle_ping(request):
+        return web.Response(text="CallTimerBot is running 24/7!")
+
+    app.router.add_get("/", handle_ping)
+    app.router.add_get("/healthz", handle_ping)
+
+    port = int(os.getenv("PORT", "8080"))
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    try:
+        await site.start()
+        logger.info(f"Health-check web server running on port {port}")
+    except Exception as e:
+        logger.warning(f"Could not start web server on port {port}: {e}")
+
+
 class CallTimerBot(discord.Client):
     def __init__(self):
         super().__init__(intents=intents)
@@ -54,6 +76,9 @@ class CallTimerBot(discord.Client):
     async def setup_hook(self):
         database.init_db()
         logger.info("Database initialized.")
+
+        # クラウド用Webサーバー起動
+        asyncio.create_task(start_web_server())
 
         # 常駐Viewの登録 (Bot再起動後もボタン操作を有効化)
         self.add_view(ControlPanelView())
