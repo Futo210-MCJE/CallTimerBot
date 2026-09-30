@@ -1,25 +1,24 @@
 @echo off
-chcp 65001 > nul
 title CallTimerBot
 
 echo ====================================================
-echo      Discord通話自動切断Bot 起動スクリプト
+echo      Starting Discord CallTimerBot...
 echo ====================================================
 
 if not exist ".env" (
-    echo [警告] .env ファイルが見つかりません。
+    echo [ERROR] .env file not found.
     if exist ".env.example" (
         copy .env.example .env > nul
-        echo 新しい .env を作成しました。メモ帳などで編集してください。
+        echo Created .env from template. Please edit it.
     )
     pause
     exit /b 1
 )
 
-echo 依存関係を確認中...
+echo Checking dependencies...
 python -m pip install -r requirements.txt --quiet
 
-echo Botを起動しています...
+echo Running Bot...
 python bot.py
 
 pause

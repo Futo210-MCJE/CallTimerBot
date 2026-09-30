@@ -66,6 +66,11 @@ def init_db():
             );
             """
         )
+        cursor.execute("PRAGMA table_info(call_logs)")
+        log_columns = [col[1] for col in cursor.fetchall()]
+        if "timer_id" not in log_columns:
+            cursor.execute("ALTER TABLE call_logs ADD COLUMN timer_id INTEGER")
+
         cursor.execute(
             """
             CREATE INDEX IF NOT EXISTS idx_logs_guild ON call_logs(guild_id);

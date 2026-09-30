@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import logging
+import os
 import socket
 import sys
 import time
@@ -773,21 +774,24 @@ async def check_call_timers():
         return
 
     for timer in active_timers:
-        end_time = timer["end_time"]
-        remaining_sec = end_time - now
+        try:
+            end_time = timer["end_time"]
+            remaining_sec = end_time - now
 
-        guild = bot.get_guild(timer["guild_id"])
-        if not guild:
-            continue
+            guild = bot.get_guild(timer["guild_id"])
+            if not guild:
+                continue
 
-        # 1. 終了時刻到達 -> 強制切断
-        if remaining_sec <= 0:
-            logger.info(f"Timer {timer['id']} reached end_time. Executing disconnect.")
-            await execute_disconnect(timer, reason="制限時間到達（自動切断）")
-            continue
+            # 1. 終了時刻到達 -> 強制切断
+            if remaining_sec <= 0:
+                logger.info(f"Timer {timer['id']} reached end_time. Executing disconnect.")
+                await execute_disconnect(timer, reason="制限時間到達（自動切断）")
+                continue
 
-        # 2. 通話カードのリアルタイム更新
-        await update_monitor_message(timer, status="RUNNING")
+            # 2. 通話カードのリアルタイム更新
+            await update_monitor_message(timer, status="RUNNING")
+        except Exception as e:
+            logger.error(f"Error processing timer {timer.get('id')}: {e}", exc_info=True)
 
 
 @check_call_timers.before_loop
