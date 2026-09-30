@@ -1,0 +1,18 @@
+# 環境変数・トークン情報
+.env
+
+# データベースファイル
+data/
+*.db
+*.sqlite3
+
+# Pythonキャッシュ
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# OS固有ファイル
+.DS_Store
+Thumbs.db
