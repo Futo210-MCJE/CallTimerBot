@@ -50,7 +50,13 @@ def init_db():
             """
         )
 
-        # 通話履歴ログテーブル (終了した通話のアルバム・実績記録)
+        # 通話履歴ログテーブル (古いreason制約付きテーブルがあれば再作成)
+        cursor.execute("PRAGMA table_info(call_logs)")
+        log_columns = [col[1] for col in cursor.fetchall()]
+        if "reason" in log_columns:
+            cursor.execute("DROP TABLE call_logs")
+            log_columns = []
+
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS call_logs (
@@ -66,10 +72,6 @@ def init_db():
             );
             """
         )
-        cursor.execute("PRAGMA table_info(call_logs)")
-        log_columns = [col[1] for col in cursor.fetchall()]
-        if "timer_id" not in log_columns:
-            cursor.execute("ALTER TABLE call_logs ADD COLUMN timer_id INTEGER")
 
         cursor.execute(
             """
